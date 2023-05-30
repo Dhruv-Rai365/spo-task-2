@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>task 2</title>
+</head>
+<body>
+  <div id="planet-info"></div>
+
+  <script>
+
+    function isDataExpired() {
+      const cachedData = localStorage.getItem('swapiData');
+      if (cachedData) {
+        const { timestamp, data } = JSON.parse(cachedData);
+        const currentTime = new Date().getTime();
+        const expirationTime = timestamp + 3600 * 1000; 
+        return currentTime >= expirationTime;
+      }
+      return true; 
+    }
+
+    function fetchDataAndCache() {
+      fetch('https://swapi.dev/api/planets/1/')
+        .then(response => response.json()) 
+        .then(data => {
+          const timestamp = new Date().getTime();
+          const cachedData = { timestamp, data };
+          localStorage.setItem('swapiData', JSON.stringify(cachedData));
+
+          displayData(data);
+        })
+        .catch(error => {
+          console.log('Error:', error);
+        });
+    }
+    function displayData(data) {
+      const planetInfo = document.getElementById('planet-info');
+      planetInfo.innerHTML = `
+        <h2>${data.name}</h2>
+        <p>Rotation Period: ${data.rotation_period}</p>
+        <p>Orbital Period: ${data.orbital_period}</p>
+        <p>Diameter: ${data.diameter}</p>
+        <p>Climate: ${data.climate}</p>
+        <p>Gravity: ${data.gravity}</p>
+        <p>Terrain: ${data.terrain}</p>
+        <p>Population: ${data.population}</p>
+      `;
+    }
+
+    if (isDataExpired()) {
+      fetchDataAndCache();
+    } else {
+      const cachedData = localStorage.getItem('swapiData');
+      const { data } = JSON.parse(cachedData);
+      displayData(data);
+    }
+  </script>
+</body>
+</html>
